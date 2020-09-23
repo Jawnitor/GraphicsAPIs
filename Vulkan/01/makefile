@@ -3,8 +3,8 @@ CFLAGS	:= -std=c++17 -Wall -Wextra -g
 
 BIN		:= bin
 SRC		:= src
-INCLUDE	:= include
-LIB		:= lib
+#INCLUDE	:= include
+#LIB		:= lib
 
 LIBRARIES	:= -lglfw -ldl -lvulkan
 
@@ -20,8 +20,8 @@ INCLUDEDIRS	:= $(shell find $(INCLUDE) -type d)
 LIBDIRS		:= $(shell find $(LIB) -type d)
 endif
 
-CINCLUDES	:= $(patsubst %,-I%, $(INCLUDEDIRS:%/=%))
-CLIBS		:= $(patsubst %,-L%, $(LIBDIRS:%/=%))
+#CINCLUDES	:= $(patsubst %,-I%, $(INCLUDEDIRS:%/=%))
+#CLIBS		:= $(patsubst %,-L%, $(LIBDIRS:%/=%))
 
 SOURCES		:= $(wildcard $(patsubst %,%/*.cpp, $(SOURCEDIRS)))
 OBJECTS		:= $(SOURCES:.cpp=.o)
