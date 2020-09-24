@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <string.h>
 #include <vector>
 
 class vulkanRenderer
@@ -22,7 +23,11 @@ private:
   VkInstance instance;
 
   // vulkan Functions
+  //--CreateFunctions
   void createInstance();
+
+  //--Support Funnctions
+  bool checkInstExtentionSupport(std::vector<const char *> *checkExtentions);
 };
 
 #endif // VULKAN_RENDERER_HPP

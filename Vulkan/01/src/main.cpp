@@ -7,16 +7,19 @@
 
 #include "vulkanRenderer.hpp"
 
-GLFWwindow *   window;
+GLFWwindow *   window = NULL;
 vulkanRenderer vulkanrenderer;
 
 void initWindow(std::string wName = "testWin", const int width = 800, const int height = 600)
 {
   // init glfw
+  glfwInit();
+
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
   window = glfwCreateWindow(width, height, wName.c_str(), nullptr, nullptr);
+  if (window == NULL) std::cerr << "ERROR [GLFW]: failed to create window!\n";
 }
 
 int main()

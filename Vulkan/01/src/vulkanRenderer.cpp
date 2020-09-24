@@ -33,9 +33,9 @@ void vulkanRenderer::createInstance()
   appInfo.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO; // sets info type
   appInfo.pApplicationName   = "Vulkan App";                       // name of app
   appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);           // gives app a version
-  appInfo.pEngineName        = "NoEngine";                         // for if you want to make an engine
-  appInfo.engineVersion      = VK_MAKE_VERSION(0, 0, 0);           // for if you want to make an engine
-  appInfo.apiVersion         = VK_API_VERSION_1_1;                 // vulkan version being used
+  appInfo.pEngineName        = "NoEngine";               // for if you want to make an engine
+  appInfo.engineVersion      = VK_MAKE_VERSION(0, 0, 0); // for if you want to make an engine
+  appInfo.apiVersion         = VK_API_VERSION_1_1;       // vulkan version being used
 
   // creation indfomation for vk instance
   VkInstanceCreateInfo createInfo = {};
@@ -53,9 +53,45 @@ void vulkanRenderer::createInstance()
   // add GLFW extentions to list of extentions
   for (size_t i = 0; i < glfwExtensionCount; i++) instanceExtentions.push_back(glfwExtentions[i]);
 
+  if (!checkInstExtentionSupport(&instanceExtentions))
+    throw std::runtime_error("Vulkan does not support required extentions");
+
   createInfo.enabledExtensionCount   = static_cast<uint32_t>(instanceExtentions.size());
   createInfo.ppEnabledExtensionNames = instanceExtentions.data();
 
-  // Validation layers
-  createInfo.enabledLayerCount = 0;
+  // todo Validation layers
+  createInfo.enabledLayerCount   = 0;
+  createInfo.ppEnabledLayerNames = nullptr;
+
+  // Create instance
+  VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
+  if (result != VK_SUCCESS) throw std::runtime_error("failed to make a vulkan instance");
+}
+
+// checks if we have the req extentions
+bool vulkanRenderer::checkInstExtentionSupport(std::vector<const char *> *checkExtentions)
+{
+  // ned to get number of extentions to create array of correct size to hold extenstions
+  uint32_t extentionCount = 0;
+  vkEnumerateInstanceExtensionProperties(nullptr, &extentionCount, nullptr);
+
+  // create a list of vkExtentionProperties using count
+  std::vector<VkExtensionProperties> extentions(extentionCount);
+  vkEnumerateInstanceExtensionProperties(nullptr, &extentionCount, extentions.data());
+
+  // check if given extentions are in list
+  for (const auto &checkExtentions : *checkExtentions)
+  {
+    bool hasExtention = false;
+    for (const auto &extentions : extentions)
+    {
+      if (strcmp(checkExtentions, extentions.extensionName))
+      {
+        hasExtention = true;
+        break;
+      }
+    }
+    if (!hasExtention) return false;
+  }
+  return true;
 }
