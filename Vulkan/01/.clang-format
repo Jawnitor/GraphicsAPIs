@@ -1,5 +1,18 @@
+BasedOnStyle                        : Microsoft
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: 'true'
+AlignConsecutiveDeclarations: 'true'
+AlignEscapedNewlines: Left
+AlignOperands: 'true'
+AlignTrailingComments: 'true'
+AllowShortCaseLabelsOnASingleLine: 'true'
+AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortIfStatementsOnASingleLine: 'true'
+AllowShortLoopsOnASingleLine: 'true'
+ColumnLimit: '110'
+IndentWidth: '2'
 
-BasedOnStyle                                  : Chromium
+
 #AlignTrailingComments                        : 'true'
 #AllowAllArgumentsOnNextLine                  : 'true'
 #AllowAllConstructorInitializersOnNextLine    : 'true'
@@ -11,9 +24,6 @@ BasedOnStyle                                  : Chromium
 #AllowShortIfStatementsOnASingleLine          : 'Always'
 #AllowShortLambdasOnASingleLine               : 'All'
 #AllowShortLoopsOnASingleLine                 : 'true'
-
-IndentWidth                                  : '2'
-ColumnLimit                                  : '110'
 
 #AccessModifierOffset                        : -4
 #AlignAfterOpenBracket                       : DontAlign

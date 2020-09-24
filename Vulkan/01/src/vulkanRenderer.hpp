@@ -8,14 +8,15 @@
 #include <stdexcept>
 #include <vector>
 
-class vulkanRenderer {
- public:
+class vulkanRenderer
+{
+public:
   vulkanRenderer();
-  int init(GLFWwindow* newWindow);
+  int init(GLFWwindow *newWindow);
   ~vulkanRenderer();
 
- private:
-  GLFWwindow* window;
+private:
+  GLFWwindow *window;
 
   // vulkan Conmponents
   VkInstance instance;
@@ -24,4 +25,4 @@ class vulkanRenderer {
   void createInstance();
 };
 
-#endif  // VULKAN_RENDERER_HPP
+#endif // VULKAN_RENDERER_HPP
