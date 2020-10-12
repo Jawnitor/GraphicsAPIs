@@ -3,31 +3,41 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include <string.h>
 
 #include <iostream>
 #include <stdexcept>
-#include <string.h>
 #include <vector>
 
 class vulkanRenderer
 {
-public:
-  vulkanRenderer();
-  int init(GLFWwindow *newWindow);
-  ~vulkanRenderer();
+  public:
+    vulkanRenderer();
+    void cleanUp();
 
-private:
-  GLFWwindow *window;
+    int init(GLFWwindow *newWindow);
+    ~vulkanRenderer();
 
-  // vulkan Conmponents
-  VkInstance instance;
+  private:
+    GLFWwindow *window;
 
-  // vulkan Functions
-  //--CreateFunctions
-  void createInstance();
+    // vulkan Conmponents
+    VkInstance instance;
+    struct
+    {
+        VkPhysicalDevice physicalDevice;
+        VkDevice         logicalDevice;
+    } mainDevice;
 
-  //--Support Funnctions
-  bool checkInstExtentionSupport(std::vector<const char *> *checkExtentions);
+    // vulkan Functions
+    //--CreateFunctions
+    void createInstance();
+
+    //--Get Functions
+    void getPhysicalDevice();
+
+    //--Support Funnctions
+    bool checkInstExtentionSupport(std::vector<const char *> *checkExtentions);
 };
 
 #endif // VULKAN_RENDERER_HPP

@@ -93,8 +93,7 @@ int main(int argc, char *argv[])
 }
 
 // initalizes OpenGL, GLFW and glew
-bool initOpenGL()
-{
+bool initOpenGL(){
   if (!glfwInit())
   { // prints error to tell user that glfw did big bad
     Error("GLFW initalization Failed");
