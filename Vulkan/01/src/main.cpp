@@ -7,10 +7,10 @@
 
 #include "vulkanRenderer.hpp"
 
-GLFWwindow *   window = NULL;
+GLFWwindow *   window = nullptr;
 vulkanRenderer vulkanrenderer;
 
-void initWindow(std::string wName = "testWin", const int width = 800, const int height = 600)
+void initWindow(const std::string& wName = "testWin", const int width = 800, const int height = 600)
 {
     // init glfw
     glfwInit();
@@ -19,7 +19,7 @@ void initWindow(std::string wName = "testWin", const int width = 800, const int 
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     window = glfwCreateWindow(width, height, wName.c_str(), nullptr, nullptr);
-    if (window == NULL) std::cerr << "ERROR [GLFW]: failed to create window!\n";
+    if (window == nullptr) std::cerr << "ERROR [GLFW]: failed to create window!\n";
 }
 
 int main()

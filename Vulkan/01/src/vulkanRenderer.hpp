@@ -3,7 +3,7 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include <string.h>
+#include <cstring>
 
 #include <iostream>
 #include <stdexcept>
@@ -21,7 +21,7 @@ class vulkanRenderer
   private:
     GLFWwindow *window;
 
-    // vulkan Conmponents
+    // vulkan Components
     VkInstance instance;
     struct
     {
@@ -36,8 +36,8 @@ class vulkanRenderer
     //--Get Functions
     void getPhysicalDevice();
 
-    //--Support Funnctions
-    bool checkInstExtentionSupport(std::vector<const char *> *checkExtentions);
+    //--Support Functions Extension
+    bool checkInstExtensionSupport(std::vector<const char *> *checkExtensions);
 };
 
 #endif // VULKAN_RENDERER_HPP
