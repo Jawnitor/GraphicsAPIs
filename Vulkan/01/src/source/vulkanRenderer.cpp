@@ -1,4 +1,4 @@
-#include "vulkanRenderer.hpp"
+#include "../headers/vulkanRenderer.hpp"
 
 vulkanRenderer::vulkanRenderer()
 {
@@ -83,8 +83,18 @@ void vulkanRenderer::getPhysicalDevice()
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
-    //
+    // if no devices available then no support vulkan
+    if (deviceCount == 0)
+        throw std::runtime_error("Can't find any GPU's that support Vulkan Instance");
+
+    // get list od Physical Devices
+    std::vector<VkPhysicalDevice> vDeviceList(deviceCount);
+    vkEnumeratePhysicalDevices(instance, &deviceCount, vDeviceList.data());
+
+    // TEMP: Just pick first device
+    mainDevice.vPhysicalDevice = vDeviceList[0];
 }
+
 
 // func checks if we have the required extensions
 bool vulkanRenderer::checkInstExtensionSupport(std::vector<const char *> *checkExtensions)
@@ -114,3 +124,35 @@ bool vulkanRenderer::checkInstExtensionSupport(std::vector<const char *> *checkE
     }
     return true;
 }
+bool vulkanRenderer::checkDeviceSuitable(VkPhysicalDevice vpdDevice)
+{
+    /*
+    // Information about the device(ID, name, type, vendor, etc)
+    VkPhysicalDeviceProperties vDeviceProperties;
+    vkGetPhysicalDeviceProperties(vpdDevice, &vDeviceProperties);
+
+    //Information about what the device can do (geo shader, tess shader, wide lines, etc)
+    VkPhysicalDeviceFeatures vDeviceFeatures;
+    vkGetPhysicalDeviceFeatures(vpdDevice, &vDeviceFeatures);
+    */
+
+    return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

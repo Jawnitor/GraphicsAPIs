@@ -25,8 +25,8 @@ class vulkanRenderer
     VkInstance instance;
     struct
     {
-        VkPhysicalDevice physicalDevice;
-        VkDevice         logicalDevice;
+        VkPhysicalDevice vPhysicalDevice;
+        VkDevice         vLogicalDevice;
     } mainDevice;
 
     // vulkan Functions
@@ -38,6 +38,7 @@ class vulkanRenderer
 
     //--Support Functions Extension
     bool checkInstExtensionSupport(std::vector<const char *> *checkExtensions);
+    bool checkDeviceSuitable(VkPhysicalDevice vpdDevice);
 };
 
 #endif // VULKAN_RENDERER_HPP
