@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include "../headers/Utilities.hpp"
+
 class vulkanRenderer
 {
   public:
@@ -30,15 +32,20 @@ class vulkanRenderer
     } mainDevice;
 
     // vulkan Functions
-    //--CreateFunctions
+    //-CreateFunctions
     void createInstance();
+    void createLogicalDevice();
 
-    //--Get Functions
+    //-Get Functions
     void getPhysicalDevice();
 
-    //--Support Functions Extension
+    //-Support Functions Extension
+    //-- Checker Functions
     bool checkInstExtensionSupport(std::vector<const char *> *checkExtensions);
     bool checkDeviceSuitable(VkPhysicalDevice vpdDevice);
+
+    // -- Getter Functions
+    QueueFamilyIndices getQueueFamilies(VkPhysicalDevice vpdDevice);
 };
 
 #endif // VULKAN_RENDERER_HPP

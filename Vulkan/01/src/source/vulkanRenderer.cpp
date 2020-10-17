@@ -4,6 +4,11 @@ vulkanRenderer::vulkanRenderer()
 {
 }
 
+void vulkanRenderer::cleanUp()
+{
+    vkDestroyInstance(instance, nullptr);
+}
+
 // func creates window
 int vulkanRenderer::init(GLFWwindow *newWindow)
 {
@@ -13,6 +18,7 @@ int vulkanRenderer::init(GLFWwindow *newWindow)
     {
         createInstance();
         getPhysicalDevice();
+        createLogicalDevice();
     }
     catch (const std::runtime_error &e)
     {
@@ -21,11 +27,6 @@ int vulkanRenderer::init(GLFWwindow *newWindow)
     }
 
     return 0;
-}
-
-void vulkanRenderer::cleanUp()
-{
-    vkDestroyInstance(instance, nullptr);
 }
 
 vulkanRenderer::~vulkanRenderer()
@@ -43,7 +44,7 @@ void vulkanRenderer::createInstance()
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);           // gives app a version
     appInfo.pEngineName        = "NoEngine";               // for if you want to make an engine
     appInfo.engineVersion      = VK_MAKE_VERSION(0, 0, 0); // for if you want to make an engine
-    appInfo.apiVersion         = VK_API_VERSION_1_1;       // vulkan version being used
+    appInfo.apiVersion         = VK_API_VERSION_1_0;       // vulkan version being used
 
     // creation information for vk instance
     VkInstanceCreateInfo createInfo = {};
@@ -77,6 +78,28 @@ void vulkanRenderer::createInstance()
 
     if (result != VK_SUCCESS) throw std::runtime_error("failed to make a vulkan instance");
 }
+
+void vulkanRenderer::createLogicalDevice()
+{
+    // Get queue family indices for the chosen Physical Device
+    QueueFamilyIndices indices = getQueueFamilies(mainDevice.vPhysicalDevice);
+
+    // Queues the logical device needs to create info to do so(Only 1 for now, will add more later!)
+    VkDeviceQueueCreateInfo queueCreateInfo = {};
+    queueCreateInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    // The index of the family to create a queue from
+    queueCreateInfo.queueFamilyIndex = indices.iGraphicsFamily;
+    queueCreateInfo.queueCount       = 1; // Number of queues to create
+    float fPriority                  = 1.0f;
+    queueCreateInfo.pQueuePriorities = &fPriority;
+    // ^ Vulkan needs to know how to handle multiple queues. so decided highest priority (1 highest)
+
+    // Information to create logical device (sometimes called "device")
+    VkDeviceCreateInfo vDeviceCreateInfo   = {};
+    vDeviceCreateInfo.sType                = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    vDeviceCreateInfo.queueCreateInfoCount = 1; // Number of queue create Infos
+}
+
 void vulkanRenderer::getPhysicalDevice()
 {
     // Enumerate Physical devices the vkInstance can access
@@ -91,10 +114,15 @@ void vulkanRenderer::getPhysicalDevice()
     std::vector<VkPhysicalDevice> vDeviceList(deviceCount);
     vkEnumeratePhysicalDevices(instance, &deviceCount, vDeviceList.data());
 
-    // TEMP: Just pick first device
-    mainDevice.vPhysicalDevice = vDeviceList[0];
+    for (const auto &device : vDeviceList)
+    {
+        if (checkDeviceSuitable(device))
+        {
+            mainDevice.vPhysicalDevice = device;
+            break;
+        }
+    }
 }
-
 
 // func checks if we have the required extensions
 bool vulkanRenderer::checkInstExtensionSupport(std::vector<const char *> *checkExtensions)
@@ -124,6 +152,7 @@ bool vulkanRenderer::checkInstExtensionSupport(std::vector<const char *> *checkE
     }
     return true;
 }
+
 bool vulkanRenderer::checkDeviceSuitable(VkPhysicalDevice vpdDevice)
 {
     /*
@@ -135,24 +164,36 @@ bool vulkanRenderer::checkDeviceSuitable(VkPhysicalDevice vpdDevice)
     VkPhysicalDeviceFeatures vDeviceFeatures;
     vkGetPhysicalDeviceFeatures(vpdDevice, &vDeviceFeatures);
     */
+    QueueFamilyIndices indices = getQueueFamilies(vpdDevice);
 
-    return true;
+    return indices.isValid();
 }
 
+QueueFamilyIndices vulkanRenderer::getQueueFamilies(VkPhysicalDevice vpdDevice)
+{
+    QueueFamilyIndices indices;
 
+    // Get all Queue Family Properties info for the given device
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(vpdDevice, &queueFamilyCount, nullptr);
 
+    std::vector<VkQueueFamilyProperties> queueFamilyList(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(vpdDevice, &queueFamilyCount, queueFamilyList.data());
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    // go through each queue family and check if it has atleast 1 of the required types of queue
+    int i = 0;
+    for (const auto &queueFamily : queueFamilyList)
+    {
+        // First check if queue family has at least 1 queue in that family (possible to have none)
+        // Queue can be multiple types defined thought bitfield. Need to bitwise AND with
+        // VK_QUEUE_*_BIT to check if has required type
+        if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        {
+            indices.iGraphicsFamily = i; // if queue family is valid then get index
+        }
+        // Check if queue family indices are in a valid state, stop searching if so
+        if (indices.isValid()) break;
+        i++;
+    }
+    return indices;
+}
