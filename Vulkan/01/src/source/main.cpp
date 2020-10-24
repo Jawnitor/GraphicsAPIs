@@ -10,7 +10,7 @@
 GLFWwindow *   window = nullptr;
 vulkanRenderer vulkanrenderer;
 
-void initWindow(const std::string& wName = "testWin", const int width = 800, const int height = 600)
+void initWindow(const std::string &wName = "testWin", const int width = 800, const int height = 600)
 {
     // init glfw
     glfwInit();

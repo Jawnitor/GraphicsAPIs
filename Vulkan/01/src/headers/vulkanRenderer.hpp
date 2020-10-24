@@ -11,6 +11,12 @@
 
 #include "../headers/Utilities.hpp"
 
+#ifdef NDEBUG
+const bool enableValidationLayers = false;
+#else
+const bool enableValidationLayers = true;
+#endif
+
 class vulkanRenderer
 {
   public:
@@ -21,7 +27,8 @@ class vulkanRenderer
     ~vulkanRenderer();
 
   private:
-    GLFWwindow *window;
+    GLFWwindow *                    window;
+    const std::vector<const char *> validationLayers = {"VK_LAYER_KHRONOS_validation"};
 
     // vulkan Components
     VkInstance instance;
@@ -30,6 +37,7 @@ class vulkanRenderer
         VkPhysicalDevice vPhysicalDevice;
         VkDevice         vLogicalDevice;
     } mainDevice;
+    VkQueue vGraphicsQueue;
 
     // vulkan Functions
     //-CreateFunctions
@@ -40,6 +48,7 @@ class vulkanRenderer
     void getPhysicalDevice();
 
     //-Support Functions Extension
+    bool checkValidationLayerSupport();
     //-- Checker Functions
     bool checkInstExtensionSupport(std::vector<const char *> *checkExtensions);
     bool checkDeviceSuitable(VkPhysicalDevice vpdDevice);

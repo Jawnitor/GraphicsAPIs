@@ -6,10 +6,10 @@ vulkanRenderer::vulkanRenderer()
 
 void vulkanRenderer::cleanUp()
 {
+    vkDestroyDevice(mainDevice.vLogicalDevice, nullptr);
     vkDestroyInstance(instance, nullptr);
 }
 
-// func creates window
 int vulkanRenderer::init(GLFWwindow *newWindow)
 {
     window = newWindow;
@@ -33,9 +33,14 @@ vulkanRenderer::~vulkanRenderer()
 {
 }
 
-// func creates instance
 void vulkanRenderer::createInstance()
 {
+    //-//ValidationLayer//-//
+    if (enableValidationLayers && !checkValidationLayerSupport())
+        throw std::runtime_error("validation layers requested, but not available!");
+
+    //-//---------------//-//
+
     // Information about the whole application
     // most data here doesnt affect the program just to help the dev
     VkApplicationInfo appInfo  = {};
@@ -44,12 +49,24 @@ void vulkanRenderer::createInstance()
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);           // gives app a version
     appInfo.pEngineName        = "NoEngine";               // for if you want to make an engine
     appInfo.engineVersion      = VK_MAKE_VERSION(0, 0, 0); // for if you want to make an engine
-    appInfo.apiVersion         = VK_API_VERSION_1_0;       // vulkan version being used
+    appInfo.apiVersion         = VK_API_VERSION_1_1;       // vulkan version being used
 
     // creation information for vk instance
     VkInstanceCreateInfo createInfo = {};
     createInfo.sType                = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo     = &appInfo;
+
+    //-//
+    if (enableValidationLayers)
+    {
+        createInfo.enabledLayerCount   = static_cast<uint32_t>(validationLayers.size());
+        createInfo.ppEnabledLayerNames = validationLayers.data();
+    }
+    else
+    {
+        createInfo.enabledLayerCount = 0;
+    }
+    //-//
 
     // create list to hold instance extensions
     std::vector<const char *> instanceExtensions = std::vector<const char *>();
@@ -95,9 +112,29 @@ void vulkanRenderer::createLogicalDevice()
     // ^ Vulkan needs to know how to handle multiple queues. so decided highest priority (1 highest)
 
     // Information to create logical device (sometimes called "device")
-    VkDeviceCreateInfo vDeviceCreateInfo   = {};
-    vDeviceCreateInfo.sType                = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    vDeviceCreateInfo.queueCreateInfoCount = 1; // Number of queue create Infos
+    VkDeviceCreateInfo vDeviceCreateInfo      = {};
+    vDeviceCreateInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    vDeviceCreateInfo.queueCreateInfoCount    = 1;                // Number of queue create Infos
+    vDeviceCreateInfo.pQueueCreateInfos       = &queueCreateInfo; // list of queue create infos
+    vDeviceCreateInfo.enabledExtensionCount   = 0; // Number of enabled logical device extensions
+    vDeviceCreateInfo.ppEnabledExtensionNames = nullptr; // list of logical device extensions
+
+    // physical device features the logical device will be using
+    VkPhysicalDeviceFeatures deviceFeatures = {};
+
+    // Physical device features logical device will use
+    vDeviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+
+    // create the logical device for given physical device
+    VkResult result = vkCreateDevice(mainDevice.vPhysicalDevice, &vDeviceCreateInfo, nullptr,
+                                     &mainDevice.vLogicalDevice);
+    if (result != VK_SUCCESS) throw std::runtime_error("failed to make logical device");
+
+    // Queues are created at the same time as device
+    // so we want to handle queues
+    // from given logical device, of given Queue family, of given index (0 as there is one queue)
+    // please reference vkQueue
+    vkGetDeviceQueue(mainDevice.vLogicalDevice, indices.iGraphicsFamily, 0, &vGraphicsQueue);
 }
 
 void vulkanRenderer::getPhysicalDevice()
@@ -108,7 +145,7 @@ void vulkanRenderer::getPhysicalDevice()
 
     // if no devices available then no support vulkan
     if (deviceCount == 0)
-        throw std::runtime_error("Can't find any GPU's that support Vulkan Instance");
+        throw std::runtime_error("Can't find any CPUs that support Vulkan Instance");
 
     // get list od Physical Devices
     std::vector<VkPhysicalDevice> vDeviceList(deviceCount);
@@ -124,7 +161,33 @@ void vulkanRenderer::getPhysicalDevice()
     }
 }
 
-// func checks if we have the required extensions
+bool vulkanRenderer::checkValidationLayerSupport()
+{
+    uint32_t layerCount;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+    std::vector<VkLayerProperties> availableLayers(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+    for (const char *layerName : validationLayers)
+    {
+        bool layerFound = false;
+
+        for (const auto &layerProperties : availableLayers)
+        {
+            if (strcmp(layerName, layerProperties.layerName) == 0)
+            {
+                layerFound = true;
+                break;
+            }
+        }
+
+        if (!layerFound) return false;
+    }
+
+    return true;
+}
+
 bool vulkanRenderer::checkInstExtensionSupport(std::vector<const char *> *checkExtensions)
 {
     // and to get number of extensions to create array of correct size to hold
@@ -180,7 +243,7 @@ QueueFamilyIndices vulkanRenderer::getQueueFamilies(VkPhysicalDevice vpdDevice)
     std::vector<VkQueueFamilyProperties> queueFamilyList(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(vpdDevice, &queueFamilyCount, queueFamilyList.data());
 
-    // go through each queue family and check if it has atleast 1 of the required types of queue
+    // go through each queue family and check if it has at least 1 of the required types of queue
     int i = 0;
     for (const auto &queueFamily : queueFamilyList)
     {
