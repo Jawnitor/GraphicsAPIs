@@ -1,16 +1,16 @@
-BasedOnStyle                                  : Microsoft
-AlignAfterOpenBracket                         : Align
-AlignConsecutiveAssignments                   : 'true'
-AlignConsecutiveDeclarations                  : 'true'
-AlignEscapedNewlines                          : Left
-AlignOperands                                 : 'true'
-AlignTrailingComments                         : 'true'
-AllowShortCaseLabelsOnASingleLine             : 'true'
-AllowShortFunctionsOnASingleLine              : InlineOnly
-AllowShortIfStatementsOnASingleLine           : 'true'
-AllowShortLoopsOnASingleLine                  : 'true'
-ColumnLimit                                   : '100'
-IndentWidth                                   : '4'
+BasedOnStyle: Chromium
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: 'true'
+AlignConsecutiveDeclarations: 'true'
+AlignEscapedNewlines: Left
+AlignOperands: 'true'
+AlignTrailingComments: 'true'
+AllowShortCaseLabelsOnASingleLine: 'true'
+AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortIfStatementsOnASingleLine: 'true'
+AllowShortLoopsOnASingleLine: 'true'
+ColumnLimit: '100'
+IndentWidth: '4'
 
 #---------------------------------------------#----------------------------------
 

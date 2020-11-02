@@ -2,12 +2,11 @@
 #define INC_01_UTILITIES_HPP
 
 // Indices (locations) of queue families (if they exist)
-struct QueueFamilyIndices
-{
-    int iGraphicsFamily = -1; // Location of graphics queue families
+struct QueueFamilyIndices {
+    int iGraphicsFamily = -1;  // Location of graphics queue families
 
     // check if queue families are valid
-    bool isValid() { return iGraphicsFamily >= 0; }
+    bool isValid() const { return iGraphicsFamily >= 0; }
 };
 
-#endif // INC_01_UTILITIES_HPP
+#endif  // INC_01_UTILITIES_HPP

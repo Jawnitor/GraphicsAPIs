@@ -1,27 +1,26 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic   ignored "hicpp-signed-bitwise"
 #include "../headers/vulkanRenderer.hpp"
 
-vulkanRenderer::vulkanRenderer()
-{
-}
+vulkanRenderer::vulkanRenderer() = default;
 
-void vulkanRenderer::cleanUp()
-{
+void vulkanRenderer::cleanUp() {
     vkDestroyDevice(mainDevice.vLogicalDevice, nullptr);
     vkDestroyInstance(instance, nullptr);
+
+    if (enableValidationLayers)
+        vValid.DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 }
 
-int vulkanRenderer::init(GLFWwindow *newWindow)
-{
+int vulkanRenderer::init(GLFWwindow* newWindow) {
     window = newWindow;
 
-    try
-    {
+    try {
         createInstance();
         getPhysicalDevice();
         createLogicalDevice();
-    }
-    catch (const std::runtime_error &e)
-    {
+        setupDebugMessenger();
+    } catch (const std::runtime_error& e) {
         std::cerr << "ERROR: %s\n" << e.what() << "\n";
         return EXIT_FAILURE;
     }
@@ -29,50 +28,60 @@ int vulkanRenderer::init(GLFWwindow *newWindow)
     return 0;
 }
 
-vulkanRenderer::~vulkanRenderer()
-{
+void vulkanRenderer::setupDebugMessenger() {
+    if (!enableValidationLayers) return;
+
+    VkDebugUtilsMessengerCreateInfoEXT createInfo{};
+    createInfo.sType           = VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT;
+    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                             VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                             VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    createInfo.pfnUserCallback = vValid.debugCallBack;
+    createInfo.pUserData       = nullptr;  // Optional
 }
 
-void vulkanRenderer::createInstance()
-{
-    //-//ValidationLayer//-//
-    if (enableValidationLayers && !checkValidationLayerSupport())
-        throw std::runtime_error("validation layers requested, but not available!");
+vulkanRenderer::~vulkanRenderer() = default;
 
-    //-//---------------//-//
-
+void vulkanRenderer::createInstance() {
     // Information about the whole application
     // most data here doesnt affect the program just to help the dev
     VkApplicationInfo appInfo  = {};
-    appInfo.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO; // sets info type
-    appInfo.pApplicationName   = "Vulkan App";                       // name of app
-    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);           // gives app a version
-    appInfo.pEngineName        = "NoEngine";               // for if you want to make an engine
-    appInfo.engineVersion      = VK_MAKE_VERSION(0, 0, 0); // for if you want to make an engine
-    appInfo.apiVersion         = VK_API_VERSION_1_1;       // vulkan version being used
+    appInfo.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;  // sets info type
+    appInfo.pApplicationName   = "Vulkan App";                        // name of app
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);            // gives app a version
+    appInfo.pEngineName        = "NoEngine";                // for if you want to make an engine
+    appInfo.engineVersion      = VK_MAKE_VERSION(0, 0, 0);  // for if you want to make an engine
+    appInfo.apiVersion         = VK_API_VERSION_1_1;        // vulkan version being used
 
     // creation information for vk instance
     VkInstanceCreateInfo createInfo = {};
     createInfo.sType                = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo     = &appInfo;
 
-    //-//
-    if (enableValidationLayers)
-    {
-        createInfo.enabledLayerCount   = static_cast<uint32_t>(validationLayers.size());
-        createInfo.ppEnabledLayerNames = validationLayers.data();
-    }
-    else
-    {
+    //-// validation
+    if (enableValidationLayers && !vValid.checkValidationLayerSupport())
+        throw std::runtime_error("validation layers requested, but not available!");
+
+    if (enableValidationLayers) {
+        createInfo.enabledLayerCount   = static_cast<uint32_t>(vValid.validationLayers.size());
+        createInfo.ppEnabledLayerNames = vValid.validationLayers.data();
+    } else {
         createInfo.enabledLayerCount = 0;
     }
+
+    auto extensions                    = vValid.getRequiredExtensions();
+    createInfo.enabledExtensionCount   = static_cast<uint32_t>(extensions.size());
+    createInfo.ppEnabledExtensionNames = extensions.data();
     //-//
 
     // create list to hold instance extensions
-    std::vector<const char *> instanceExtensions = std::vector<const char *>();
+    std::vector<const char*> instanceExtensions = std::vector<const char*>();
     // sets up extension instance
-    uint32_t     glfwExtensionCount = 0; // may require multiple extensions
-    const char **glfwExtensions;         // Extensions passed as array of cStrings
+    uint32_t     glfwExtensionCount = 0;  // may require multiple extensions
+    const char** glfwExtensions;          // Extensions passed as array of cStrings
     // gets GLFW extensions
     glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
@@ -96,8 +105,7 @@ void vulkanRenderer::createInstance()
     if (result != VK_SUCCESS) throw std::runtime_error("failed to make a vulkan instance");
 }
 
-void vulkanRenderer::createLogicalDevice()
-{
+void vulkanRenderer::createLogicalDevice() {
     // Get queue family indices for the chosen Physical Device
     QueueFamilyIndices indices = getQueueFamilies(mainDevice.vPhysicalDevice);
 
@@ -106,7 +114,7 @@ void vulkanRenderer::createLogicalDevice()
     queueCreateInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     // The index of the family to create a queue from
     queueCreateInfo.queueFamilyIndex = indices.iGraphicsFamily;
-    queueCreateInfo.queueCount       = 1; // Number of queues to create
+    queueCreateInfo.queueCount       = 1;  // Number of queues to create
     float fPriority                  = 1.0f;
     queueCreateInfo.pQueuePriorities = &fPriority;
     // ^ Vulkan needs to know how to handle multiple queues. so decided highest priority (1 highest)
@@ -114,10 +122,10 @@ void vulkanRenderer::createLogicalDevice()
     // Information to create logical device (sometimes called "device")
     VkDeviceCreateInfo vDeviceCreateInfo      = {};
     vDeviceCreateInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    vDeviceCreateInfo.queueCreateInfoCount    = 1;                // Number of queue create Infos
-    vDeviceCreateInfo.pQueueCreateInfos       = &queueCreateInfo; // list of queue create infos
-    vDeviceCreateInfo.enabledExtensionCount   = 0; // Number of enabled logical device extensions
-    vDeviceCreateInfo.ppEnabledExtensionNames = nullptr; // list of logical device extensions
+    vDeviceCreateInfo.queueCreateInfoCount    = 1;                 // Number of queue create Infos
+    vDeviceCreateInfo.pQueueCreateInfos       = &queueCreateInfo;  // list of queue create infos
+    vDeviceCreateInfo.enabledExtensionCount   = 0;  // Number of enabled logical device extensions
+    vDeviceCreateInfo.ppEnabledExtensionNames = nullptr;  // list of logical device extensions
 
     // physical device features the logical device will be using
     VkPhysicalDeviceFeatures deviceFeatures = {};
@@ -137,8 +145,7 @@ void vulkanRenderer::createLogicalDevice()
     vkGetDeviceQueue(mainDevice.vLogicalDevice, indices.iGraphicsFamily, 0, &vGraphicsQueue);
 }
 
-void vulkanRenderer::getPhysicalDevice()
-{
+void vulkanRenderer::getPhysicalDevice() {
     // Enumerate Physical devices the vkInstance can access
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -151,45 +158,15 @@ void vulkanRenderer::getPhysicalDevice()
     std::vector<VkPhysicalDevice> vDeviceList(deviceCount);
     vkEnumeratePhysicalDevices(instance, &deviceCount, vDeviceList.data());
 
-    for (const auto &device : vDeviceList)
-    {
-        if (checkDeviceSuitable(device))
-        {
+    for (const auto& device : vDeviceList) {
+        if (checkDeviceSuitable(device)) {
             mainDevice.vPhysicalDevice = device;
             break;
         }
     }
 }
 
-bool vulkanRenderer::checkValidationLayerSupport()
-{
-    uint32_t layerCount;
-    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-
-    std::vector<VkLayerProperties> availableLayers(layerCount);
-    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-
-    for (const char *layerName : validationLayers)
-    {
-        bool layerFound = false;
-
-        for (const auto &layerProperties : availableLayers)
-        {
-            if (strcmp(layerName, layerProperties.layerName) == 0)
-            {
-                layerFound = true;
-                break;
-            }
-        }
-
-        if (!layerFound) return false;
-    }
-
-    return true;
-}
-
-bool vulkanRenderer::checkInstExtensionSupport(std::vector<const char *> *checkExtensions)
-{
+bool vulkanRenderer::checkInstExtensionSupport(std::vector<const char*>* checkExtensions) {
     // and to get number of extensions to create array of correct size to hold
     // extensions
     uint32_t extensionCount = 0;
@@ -200,13 +177,10 @@ bool vulkanRenderer::checkInstExtensionSupport(std::vector<const char *> *checkE
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
     // check if given extensions are in list
-    for (const auto &checkExtensions : *checkExtensions)
-    {
+    for (const auto& checkExtensions : *checkExtensions) {
         bool hasExtension = false;
-        for (const auto &extensions : extensions)
-        {
-            if (strcmp(checkExtensions, extensions.extensionName))
-            {
+        for (const auto& extensions : extensions) {
+            if (strcmp(checkExtensions, extensions.extensionName)) {
                 hasExtension = true;
                 break;
             }
@@ -216,8 +190,7 @@ bool vulkanRenderer::checkInstExtensionSupport(std::vector<const char *> *checkE
     return true;
 }
 
-bool vulkanRenderer::checkDeviceSuitable(VkPhysicalDevice vpdDevice)
-{
+bool vulkanRenderer::checkDeviceSuitable(VkPhysicalDevice vpdDevice) {
     /*
     // Information about the device(ID, name, type, vendor, etc)
     VkPhysicalDeviceProperties vDeviceProperties;
@@ -232,8 +205,7 @@ bool vulkanRenderer::checkDeviceSuitable(VkPhysicalDevice vpdDevice)
     return indices.isValid();
 }
 
-QueueFamilyIndices vulkanRenderer::getQueueFamilies(VkPhysicalDevice vpdDevice)
-{
+QueueFamilyIndices vulkanRenderer::getQueueFamilies(VkPhysicalDevice vpdDevice) {
     QueueFamilyIndices indices;
 
     // Get all Queue Family Properties info for the given device
@@ -245,14 +217,12 @@ QueueFamilyIndices vulkanRenderer::getQueueFamilies(VkPhysicalDevice vpdDevice)
 
     // go through each queue family and check if it has at least 1 of the required types of queue
     int i = 0;
-    for (const auto &queueFamily : queueFamilyList)
-    {
+    for (const auto& queueFamily : queueFamilyList) {
         // First check if queue family has at least 1 queue in that family (possible to have none)
         // Queue can be multiple types defined thought bitfield. Need to bitwise AND with
         // VK_QUEUE_*_BIT to check if has required type
-        if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-        {
-            indices.iGraphicsFamily = i; // if queue family is valid then get index
+        if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            indices.iGraphicsFamily = i;  // if queue family is valid then get index
         }
         // Check if queue family indices are in a valid state, stop searching if so
         if (indices.isValid()) break;

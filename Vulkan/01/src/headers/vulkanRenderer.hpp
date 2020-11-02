@@ -10,34 +10,31 @@
 #include <vector>
 
 #include "../headers/Utilities.hpp"
+#include "../headers/vulkanValidation.hpp"
 
-#ifdef NDEBUG
-const bool enableValidationLayers = false;
-#else
-const bool enableValidationLayers = true;
-#endif
-
-class vulkanRenderer
-{
-  public:
+class vulkanRenderer {
+   public:
     vulkanRenderer();
     void cleanUp();
 
-    int init(GLFWwindow *newWindow);
+    int init(GLFWwindow* newWindow);
     ~vulkanRenderer();
 
-  private:
-    GLFWwindow *                    window;
-    const std::vector<const char *> validationLayers = {"VK_LAYER_KHRONOS_validation"};
+    // vulkanValidation vValid;
+
+   private:
+    GLFWwindow* window{};
+    // const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
 
     // vulkan Components
-    VkInstance instance;
-    struct
-    {
+    VkInstance               instance{};
+    VkDebugUtilsMessengerEXT debugMessenger{};
+
+    struct {
         VkPhysicalDevice vPhysicalDevice;
         VkDevice         vLogicalDevice;
-    } mainDevice;
-    VkQueue vGraphicsQueue;
+    } mainDevice{};
+    VkQueue vGraphicsQueue{};
 
     // vulkan Functions
     //-CreateFunctions
@@ -48,13 +45,13 @@ class vulkanRenderer
     void getPhysicalDevice();
 
     //-Support Functions Extension
-    bool checkValidationLayerSupport();
+    static void setupDebugMessenger();  // validation support
     //-- Checker Functions
-    bool checkInstExtensionSupport(std::vector<const char *> *checkExtensions);
-    bool checkDeviceSuitable(VkPhysicalDevice vpdDevice);
+    static bool checkInstExtensionSupport(std::vector<const char*>* checkExtensions);
+    bool        checkDeviceSuitable(VkPhysicalDevice vpdDevice);
 
     // -- Getter Functions
     QueueFamilyIndices getQueueFamilies(VkPhysicalDevice vpdDevice);
 };
 
-#endif // VULKAN_RENDERER_HPP
+#endif  // VULKAN_RENDERER_HPP
