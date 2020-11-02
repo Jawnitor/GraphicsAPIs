@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jaw/added/c_cpp/GraphicsAPIs/SDL/01/src/main.cpp
+SDL2/SDL.h
+-
+iostream
+-
+

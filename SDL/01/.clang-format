@@ -1,0 +1,63 @@
+BasedOnStyle: Microsoft
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: 'true'
+AlignConsecutiveDeclarations: 'true'
+AlignEscapedNewlines: Left
+AlignOperands: 'true'
+AlignTrailingComments: 'true'
+AllowShortCaseLabelsOnASingleLine: 'true'
+AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortIfStatementsOnASingleLine: 'true'
+AllowShortLoopsOnASingleLine: 'true'
+ColumnLimit: '100'
+IndentWidth: '4'
+
+#---------------------------------------------#----------------------------------
+
+#AlignTrailingComments                        : 'true'
+#AllowAllArgumentsOnNextLine                  : 'true'
+#AllowAllConstructorInitializersOnNextLine    : 'true'
+#AllowAllParametersOfDeclarationOnNextLine    : 'true'
+#AllowShortBlocksOnASingleLine                : 'false'
+#AllowShortCaseLabelsOnASingleLine            : 'true'
+
+#AllowShortFunctionsOnASingleLine             : 'Empty'
+#AllowShortIfStatementsOnASingleLine          : 'Always'
+#AllowShortLambdasOnASingleLine               : 'All'
+#AllowShortLoopsOnASingleLine                 : 'true'
+
+#BraceWrapping
+#  AfterClass                                 : false    # TODO: verify
+#  AfterControlStatement                      : false    # TODO: verify
+#  AfterEnum                                  : false    # TODO: verify
+#  AfterFunction                              : false    # TODO: verify
+#  AfterNamespace                             : false
+#  AfterStruct                                : false    # TODO: verify
+#  AfterUnion                                 : false    # TODO: verify
+#  BeforeCatch                                : true
+#  BeforeElse                                 : true
+#  IndentBraces                               : false
+#  SplitEmptyFunction                         : true
+#  SplitEmptyRecord                           : true
+
+#BreakBeforeBraces                            : Custom
+#ColumnLimit                                  : 0
+#Cpp11BracedListStyle                         : false
+#FixNamespaceComments                         : false
+#IndentCaseLabels                             : false
+#IndentPPDirectives                           : AfterHash
+#IndentWidth                                  : 2
+#MaxEmptyLinesToKeep                          : 10
+#NamespaceIndentation                         : All
+#PointerAlignment                             : Left
+#SortIncludes                                 : false
+#SortUsingDeclarations                        : false
+#SpaceAfterCStyleCast                         : false
+#SpaceBeforeAssignmentOperators               : true
+#SpaceBeforeParens                            : ControlStatements
+#SpaceInEmptyParentheses                      : false
+#SpacesInCStyleCastParentheses                : false
+#SpacesInParentheses                          : false
+#SpacesInSquareBrackets                       : false
+#TabWidth                                     : 2
+#UseTab                                       : true
